@@ -257,7 +257,7 @@ if not nodes.nil? and not nodes.empty?
           end
 
         when os =~ /^(open)?suse/
-          append << "install=#{install_url} autoyast=#{node_url}/autoyast.xml"
+          append << "install=#{install_url} autoyast=#{node_url}/autoyast-upgrade.xml autoupgrade=1"
           append << "ifcfg=dhcp4 netwait=60"
 
           target_platform_version = os.gsub(/^.*-/, "")
@@ -305,6 +305,23 @@ if not nodes.nil? and not nodes.empty?
                       is_ses: storage_available && !cloud_available,
                       crowbar_join: "#{os_url}/crowbar_join.sh",
                       default_fs: mnode[:crowbar_wall][:default_fs] || "ext4")
+          end
+          template "#{node_cfg_dir}/autoyast-upgrade.xml" do
+            mode 0644
+            source "autoyast-upgrade.xml.erb"
+            owner "root"
+            group "root"
+            variables(
+                      admin_node_ip: admin_ip,
+                      web_port: web_port,
+                      packages: packages,
+                      repos: repos,
+                      timezone: timezone,
+                      target_platform_version: target_platform_version,
+                      architecture: arch,
+                      is_ses: node[:provisioner][:suse] &&
+                        !node[:provisioner][:suse][:cloud_available] && node[:provisioner][:suse][:storage_available],
+                      crowbar_join: "#{os_url}/crowbar_join.sh")
           end
 
         when os =~ /^(hyperv|windows)/
