@@ -74,6 +74,10 @@
       <pattern>Minimal</pattern>
       <pattern>base</pattern>
     </patterns>
+    <!-- Avoid default Cloud pattern "cloud_admin" to be installed on all nodes -->
+    <remove-patterns config:type="list">
+	<pattern>cloud_admin</pattern>
+    </remove-patterns>
     <!-- Cleanup leftover Cloud 5 packages -->
     <remove-packages config:type="list">
      <package>facter</package>
