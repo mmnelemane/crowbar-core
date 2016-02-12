@@ -128,6 +128,11 @@ class Backup < ActiveRecord::Base
     @data = nil
   end
 
+  def cleanup
+    @data.rmtree if @data
+    @data = nil
+  end
+
   class << self
     def image_dir
       if Rails.env.production?
@@ -175,7 +180,6 @@ class Backup < ActiveRecord::Base
     @data = Pathname.new(dir)
     self.version = ENV["CROWBAR_VERSION"]
     self.size = path.size
-    self.migration_level = ActiveRecord::Migrator.current_version
   end
 
   def save_archive
