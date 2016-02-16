@@ -68,7 +68,6 @@ class BackupsController < ApplicationController
       format.html do
         if @backup.restore(background: false)
           flash[:success] = I18n.t("backups.index.restore_successful")
-          redirect_to dashboard_url
         else
           flash[:alert] = @backup.errors.full_messages.first
           redirect_to backups_url
