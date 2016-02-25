@@ -34,7 +34,12 @@ module Crowbar
       end
 
       def restore
-        cleanup if self.class.restore_steps_path.exist?
+        cleanup if self.class.restore_steps_path.exist? 
+
+        # disable/stop dns service before starting restore
+        self.class.disable_dns_path.open("a") do |f|
+          f.write "#{Time.zone.now.iso8601}\n"
+        end
 
         self.class.steps.each do |component|
           set_step(component)
@@ -78,6 +83,10 @@ module Crowbar
         def restore_steps_path
           install_dir_path.join("restore_steps")
         end
+         
+        def disable_dns_path
+          install_dir_path.join("disable_dns")
+        end
 
         def install_dir_path
           Pathname.new("/var/lib/crowbar/install")
@@ -119,6 +128,7 @@ module Crowbar
 
       def cleanup
         self.class.restore_steps_path.delete
+        self.class.disable_dns_path.delete
       end
 
       def any_errors?
@@ -153,6 +163,10 @@ module Crowbar
 
       def restore_chef
         Rails.logger.debug "Restoring chef backup files"
+
+        # allow enabling dns service 
+        disable_dns_path.delete if disable_dns_path.exist?
+
         begin
           [:nodes, :roles, :clients, :databags].each do |type|
             Dir.glob(@data.join("knife", type.to_s, "**", "*")).each do |file|
