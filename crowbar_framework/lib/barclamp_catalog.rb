@@ -23,6 +23,7 @@ class BarclampCatalog
   DEFAULT_CATEGORY   = "Unknown"
   DEFAULT_RUN_ORDER  = 1000
   DEFAULT_CHEF_ORDER = 1000
+  DEFAULT_ORDER      = 1000
 
   attr_reader :categories, :catalog
 
@@ -49,6 +50,12 @@ class BarclampCatalog
     return DEFAULT_RUN_ORDER if barclamp.nil?
     order = (barclamps[barclamp]["order"] || DEFAULT_RUN_ORDER) rescue DEFAULT_RUN_ORDER
     (barclamps[barclamp]["run_order"] || order) rescue order
+  end
+
+  def order(barclamp)
+    return DEFAULT_ORDER if barclamp.nil?
+    order = (barclamps[barclamp]["order"] || DEFAULT_ORDER) rescue DEFAULT_ORDER
+    (barclamps[barclamp]["order"] || order) rescue order
   end
 
   def members(barclamp)

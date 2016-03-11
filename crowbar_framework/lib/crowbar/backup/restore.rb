@@ -167,6 +167,22 @@ module Crowbar
 
       def restore_chef
         Rails.logger.debug "Restoring chef backup files"
+
+        # Sort proposals in the order of "order" to ensure dependencies 
+        # are met properly (eg: horizon is applied after keystone)
+        databags = @data[:databags]
+        Rails.logger.debug "Databags before sort: #{databags}"
+        databags.sort! do |x,y|
+          xname = x.name.partition(".")[0]
+          yname = y.name.partition(".")[0]
+          xs = BarclampCatalog.order(xname)
+          ys = BarclampCatalog.order(yname)
+
+          xs <=> ys
+        end
+        Rails.logger.debug "Databags after sort: #{databags}"
+        @data[:databags] = databags
+
         begin
           [:nodes, :roles, :clients, :databags].each do |type|
             Dir.glob(@data.join("knife", type.to_s, "**", "*")).each do |file|

@@ -125,6 +125,14 @@ class ServiceObject
     BarclampCatalog.chef_order(@bc_name)
   end
 
+  def self.order(bc, cat = nil)
+    BarclampCatalog.order(bc)
+  end
+
+  def order
+    BarclampCatalog.order(@bc_name)
+  end
+    
   # Approach copied from libraries/secure_password.rb in the openssl cookbook
   def random_password(size = 12)
     pw = String.new
