@@ -1,7 +1,6 @@
 inherit_from: .hound.suse.yml
 
 AllCops:
-  TargetRubyVersion: 2.1
   Rails:
     Enabled: true
   DisplayStyleGuide: true
