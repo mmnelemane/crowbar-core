@@ -34,6 +34,7 @@ module Crowbar
         databags
         db
         crowbar
+        batch
         meta
       end
 
@@ -132,6 +133,15 @@ module Crowbar
             end
           end
         end
+      end
+
+      def batch
+        logger.debug "Backing up batch export"
+
+        batch_export = Batch::Export.new(
+          path: workdir.join("crowbar", "batch-export.yml")
+        )
+        batch_export.save
       end
 
       def meta
