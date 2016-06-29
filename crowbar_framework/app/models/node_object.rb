@@ -269,7 +269,7 @@ class NodeObject < ChefObject
   end
 
   def pretty_target_platform
-    CrowbarService.pretty_target_platform(target_platform)
+    Crowbar::Platform.pretty_target_platform(target_platform)
   end
 
   def target_platform=(value)
@@ -331,7 +331,7 @@ class NodeObject < ChefObject
   end
 
   def license_key=(value)
-    if CrowbarService.require_license_key?(self.target_platform)
+    if Crowbar::Platform.require_license_key?(self.target_platform)
       @node.set[:license_key] = value
     else
       @node.set[:license_key] = ""
