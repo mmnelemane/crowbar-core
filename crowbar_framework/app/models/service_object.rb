@@ -1329,7 +1329,7 @@ class ServiceObject
         unless badones.empty?
           message = "Failed to apply the proposal to: "
           badones.each do |baddie|
-            message = message + "#{pids[baddie[0]]} \n"+ get_log_lines("#{pids[baddie[0]]}")
+            message = message + "#{pids[baddie[0]]}\n" + get_log_lines(pids[baddie[0]])
           end
           update_proposal_status(inst, "failed", message)
           restore_to_ready(applying_nodes)
@@ -1353,7 +1353,7 @@ class ServiceObject
         unless badones.empty?
           message = "Failed to apply the proposal to: "
           badones.each do |baddie|
-            message = message + "#{pids[baddie[0]]} \n "+ get_log_lines("#{pids[baddie[0]]}")
+            message = message + "#{pids[baddie[0]]}\n " + get_log_lines(pids[baddie[0]])
           end
           update_proposal_status(inst, "failed", message)
           restore_to_ready(applying_nodes)
