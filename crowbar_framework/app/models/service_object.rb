@@ -1036,7 +1036,7 @@ class ServiceObject
     element_order.each do |roles|
       # roles is an Array of names of Chef roles which can all be
       # applied in parallel.
-      @logger.debug "elems #{roles.inspect}"
+      @logger.debug "Preparing batch with following roles: #{roles.inspect}"
 
       # A list of nodes changed when applying roles from this batch
       nodes_in_batch = []
@@ -1049,9 +1049,9 @@ class ServiceObject
         old_nodes = old_elements[role_name] || []
         new_nodes = new_elements[role_name] || []
 
-        @logger.debug "role_name #{role_name.inspect}"
-        @logger.debug "old_nodes #{old_nodes.inspect}"
-        @logger.debug "new_nodes #{new_nodes.inspect}"
+        @logger.debug "Preparing role #{role_name} for batch:"
+        @logger.debug "  Nodes in old applied proposal for role: #{old_nodes.inspect}"
+        @logger.debug "  Nodes in new applied proposal for role: #{new_nodes.inspect}"
 
         remove_role_name = "#{role_name}_remove"
 
@@ -1197,7 +1197,7 @@ class ServiceObject
 
     # Part III: Update run lists of nodes to reflect new deployment. I.e. write
     # through the deployment schedule in pending node actions into run lists.
-    @logger.debug "Clean the run_lists for #{pending_node_actions.inspect}"
+    @logger.debug "Update the run_lists for #{pending_node_actions.inspect}"
 
     pending_node_actions.each do |node_name, lists|
       # pre_cached_nodes contains only new_nodes, we need to look up the
@@ -1210,9 +1210,6 @@ class ServiceObject
 
       rlist = lists[:remove]
       alist = lists[:add]
-
-      @logger.debug "rlist #{rlist.pretty_inspect}"
-      @logger.debug "alist #{alist.pretty_inspect}"
 
       # Remove the roles being lost
       rlist.each do |item|
@@ -1234,7 +1231,6 @@ class ServiceObject
         save_it = node.delete_from_run_list(role.name) || save_it
       end
 
-      @logger.debug("AR: Saving node #{node.name}") if save_it
       node.save if save_it
     end
 
