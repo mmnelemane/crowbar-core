@@ -320,7 +320,7 @@ if node[:platform_family] == "suse" && !node.roles.include?("provisioner-server"
         if attribute == "URI"
           current_url = value
         elsif attribute == "Priority"
-          current_priority = value
+          current_priority = value.to_i
         end
       end
 
