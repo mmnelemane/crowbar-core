@@ -14,47 +14,33 @@
 # limitations under the License.
 #
 
-class Api::CrowbarController < ApiController
+class Api::CrowbarController < ApplicationController
+  api :GET, "/api/crowbar", "Show the crowbar object"
+  api_version "2.0"
   def show
-    render json: Api::Crowbar.status
+    render json: {}, status: :not_implemented
   end
 
+  api :PATCH, "/api/crowbar", "Update Crowbar object"
+  api_version "2.0"
   def update
     head :not_implemented
   end
 
+  api :GET, "/api/crowbar/upgrade", "Status of Crowbar Upgrade"
+  api :POST, "/api/crowbar/upgrade", "Upgrade Crowbar"
+  api_version "2.0"
   def upgrade
     if request.post?
-      crowbar_upgrade = Api::Crowbar.upgrade!
-
-      if crowbar_upgrade[:status] == :ok
-        head :ok
-      else
-        render json: {
-          errors: {
-            admin_upgrade: {
-              data: crowbar_upgrade[:message],
-              help: I18n.t("api.crowbar.upgrade.help.default")
-            }
-          }
-        }, status: crowbar_upgrade[:status]
-      end
+      head :not_implemented
     else
-      render json: Api::Crowbar.upgrade
+      render json: {}, status: :not_implemented
     end
-  rescue Crowbar::Error::StartStepRunningError,
-         Crowbar::Error::StartStepOrderError => e
-    render json: {
-      errors: {
-        admin_upgrade: {
-          data: e.message,
-          help: I18n.t("api.crowbar.upgrade.help.default")
-        }
-      }
-    }, status: :unprocessable_entity
   end
 
+  api :GET, "/api/crowbar/maintenance", "Check for maintenance updates on crowbar"
+  api_version "2.0"
   def maintenance
-    render json: ::Crowbar::Checks::Maintenance.updates_status
+    render json: {}, status: :not_implemented
   end
 end

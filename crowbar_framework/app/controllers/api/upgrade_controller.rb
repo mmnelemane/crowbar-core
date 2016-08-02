@@ -14,120 +14,55 @@
 # limitations under the License.
 #
 
-class Api::UpgradeController < ApiController
+class Api::UpgradeController < ApplicationController
+  api :GET, "/api/upgrade", "Show the Upgrade status object"
+  api_version "2.0"
   def show
-    render json: Api::Upgrade.status
+    render json: {}, status: :not_implemented
   end
 
+  api :PATCH, "/api/upgrade", "Update Upgrade status object"
+  api_version "2.0"
   def update
     head :not_implemented
   end
 
+  api :POST, "/api/upgrade/prepare", "Prepare Crowbar Upgrade"
+  api_version "2.0"
   def prepare
-    if Api::Upgrade.prepare(background: true)
-      head :ok
-    else
-      render json: {
-        errors: {
-          prepare: {
-            data: msg,
-            help: I18n.t("api.upgrade.prepare.help.default")
-          }
-        }
-      }, status: :unprocessable_entity
+    status = :ok
+    msg = ""
+
+    begin
+      service_object = CrowbarService.new(Rails.logger)
+
+      service_object.prepare_nodes_for_crowbar_upgrade
+    rescue => e
+      msg = e.message
+      Rails.logger.error msg
+      status = :unprocessable_entity
     end
-  rescue Crowbar::Error::StartStepRunningError,
-         Crowbar::Error::StartStepOrderError => e
-    render json: {
-      errors: {
-        upgrade_prepare: {
-          data: e.message,
-          help: I18n.t("api.upgrade.prepare.help.default")
-        }
-      }
-    }, status: :unprocessable_entity
+
+    if status == :ok
+      head status
+    else
+      render json: msg, status: status
+    end
   end
 
+  api :GET, "/api/upgrade/services", "List all openstack services on all nodes that need to stop"
+  api :POST, "/api/upgrade/services", "Stop related services on all nodes during upgrade"
+  api_version "2.0"
+  def services
+    if request.post?
+      head :not_implemented
+    else
+      render json: [], status: :not_implemented
+    end
+  end
+
+  api :GET, "/api/upgrade/prechecks", "Shows a sanity check in preparation for the upgrade"
   def prechecks
-    render json: {
-      checks: Api::Upgrade.checks,
-      best_method: Api::Upgrade.best_method
-    }
-  end
-
-  def cancel
-    cancel_upgrade = Api::Upgrade.cancel
-
-    if cancel_upgrade[:status] == :ok
-      head :ok
-    else
-      render json: {
-        errors: {
-          cancel: {
-            data: cancel_upgrade[:message],
-            help: I18n.t("api.upgrade.cancel.help.default")
-          }
-        }
-      }, status: cancel_upgrade[:status]
-    end
-  end
-
-  def adminrepocheck
-    check = Api::Upgrade.adminrepocheck
-
-    if check.key?(:error)
-      render json: {
-        error: check[:error]
-      }, status: check[:status]
-    else
-      render json: check
-    end
-  rescue Crowbar::Error::StartStepRunningError,
-         Crowbar::Error::StartStepOrderError,
-         Crowbar::Error::EndStepRunningError => e
-    render json: {
-      errors: {
-        admin_repo_checks: {
-          data: e.message,
-          help: I18n.t("api.upgrade.adminrepocheck.help.default")
-        }
-      }
-    }, status: :unprocessable_entity
-  end
-
-  def adminbackup
-    upgrade_status = ::Crowbar::UpgradeStatus.new
-    upgrade_status.start_step(:admin_backup)
-    @backup = Backup.new(backup_params)
-
-    if @backup.save
-      upgrade_status.end_step
-      render json: @backup, status: :ok
-    else
-      upgrade_status.end_step(
-        false,
-        admin_backup: @backup.errors.full_messages.first
-      )
-      render json: { error: @backup.errors.full_messages.first }, status: :unprocessable_entity
-    end
-  rescue Crowbar::Error::StartStepRunningError,
-         Crowbar::Error::StartStepOrderError,
-         Crowbar::Error::EndStepRunningError => e
-    render json: {
-      errors: {
-        admin_backup: {
-          data: e.message,
-          help: I18n.t("api.upgrade.adminbackup.help.default")
-        }
-      }
-    }, status: :unprocessable_entity
-  ensure
-    @backup.cleanup unless @backup.nil?
-  end
-
-  protected
-
-  def backup_params
-    params.require(:backup).permit(:name)
+    render json: {}, status: :not_implemented
   end
 end

@@ -1,4 +1,3 @@
-
 #
 # Copyright 2016, SUSE Linux GmbH
 #
@@ -15,27 +14,27 @@
 # limitations under the License.
 #
 
-class Api::V2::ErrorsController < ApplicationController
-  api :GET, "/api/v2/errors", "Show a list of errors"
+class Api::ErrorsController < ApplicationController
+  api :GET, "/api/errors", "Show a list of errors"
   api_version "2.0"
   def index
     render json: [], status: :not_implemented
   end
 
-  api :GET, "/api/v2/errors/:id", "Show a specific error"
+  api :GET, "/api/errors/:id", "Show a specific error"
   param :id, Integer, desc: "Error ID", required: true
   api_version "2.0"
   def show
     render json: {}, status: :not_implemented
   end
 
-  api :POST, "/api/v2/errors", "Create an error"
+  api :POST, "/api/errors", "Create an error"
   api_version "2.0"
   def create
     head :not_implemented
   end
 
-  api :DELETE, "/api/v2/errors/:id", "Delete a specific error"
+  api :DELETE, "/api/errors/:id", "Delete a specific error"
   param :id, Integer, desc: "Error ID", required: true
   api_version "2.0"
   def delete
