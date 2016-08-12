@@ -24,7 +24,7 @@ class BackupsController < ApplicationController
   end
 
   api :POST, "/utils/backups", "Create a backup"
-  param :api_backup, Hash, desc: "Backup info", required: true do
+  param :backup, Hash, desc: "Backup info", required: true do
     param :name, String, desc: "Name of the backup", required: true
   end
   def create
@@ -84,6 +84,6 @@ class BackupsController < ApplicationController
   end
 
   def backup_params
-    params.require(:api_backup).permit(:name)
+    params.require(:backup).permit(:name)
   end
 end
