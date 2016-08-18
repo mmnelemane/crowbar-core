@@ -1,35 +1,6 @@
 {
-  "checks":{
-    "network_checks": {
-      "required": true,
-      "passed": true,
-      "errors": {}
-    },
-    "maintenance_updates_installed": {
-      "required": true,
-      "passed": true,
-      "errors": {}
-    },
-    "compute_resources_available": {
-      "required": false,
-      "passed": true,
-      "errors": {}
-    },
-    "ceph_healthy": {
-      "required": true,
-      "passed": true,
-      "errors": {}
-    },
-    "ha_configured": {
-      "required": false,
-      "passed": true,
-      "errors": {}
-    },
-    "clusters_healthy": {
-      "required": true,
-      "passed": true,
-      "errors": {}
-    }
-  },
-  "best_method":"non-disruptive"
+  "sanity_checks":true,
+  "maintenance_updates_missing":false,
+  "clusters_healthy":true,
+  "compute_resources_available":true
 }

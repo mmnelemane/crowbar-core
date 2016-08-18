@@ -1,42 +1,16 @@
 {
-  "current_step": "upgrade_prechecks",
-  "current_substep":null,
-  "current_node":null,
-  "remaining_nodes": null,
-  "upgraded_nodes": null,
-  "steps":{
-    "upgrade_prechecks":{
-      "status":"pending"
-    },
-    "upgrade_prepare":{
-      "status":"pending"
-    },
-    "admin_backup":{
-      "status":"pending"
-    },
-    "admin_repo_checks":{
-      "status":"pending"
-    },
-    "admin_upgrade":{
-      "status":"pending"
-    },
-    "database":{
-      "status":"pending"
-    },
-    "nodes_repo_checks":{
-      "status":"pending"
-    },
-    "nodes_services":{
-      "status":"pending"
-    },
-    "nodes_db_dump":{
-      "status":"pending"
-    },
-    "nodes_upgrade":{
-      "status":"pending"
-    },
-    "finished":{
-      "status":"pending"
+  "crowbar": {
+    "version": "4.0",
+    "upgrade": {
+      "upgrading": false,
+      "success": false,
+      "failed": false
     }
+  },
+  "checks": {
+    "sanity_checks":true,
+    "maintenance_updates_missing":false,
+    "clusters_healthy":true,
+    "compute_resources_available":true
   }
 }
