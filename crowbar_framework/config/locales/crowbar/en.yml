@@ -768,48 +768,6 @@ en:
   api:
     crowbar:
       upgrade_ongoing: 'Upgrade is already ongoing. Please wait.'
-      zypper_locked: '%{zypper_locked_message}'
-      zypper_prompt: '%{zypper_prompt_text}'
-      upgrade_script_path: 'Could not find %{path}'
-      upgrade:
-        help:
-          default: 'Refer to the error message in the response'
-    upgrade:
-      prechecks:
-        network_checks:
-          help:
-            default: 'Examine the error messages'
-        maintenance_updates_check:
-          help:
-            default: 'Make sure maintenance updates are installed'
-        ceph_health_check:
-          help:
-            default: 'Make sure Ceph is healthy'
-        clusters_health:
-          crm_failures: '"crm status" failed at nodes %{nodes}.'
-          failed_actions: '"crm status" is showing some failed actions at nodes %{nodes}.'
-          help:
-            default: 'Make sure clusters are healthy'
-        compute_resources_check:
-          help:
-            default: 'Make sure there is enough compute power'
-        ha_configured:
-          not_installed: 'HA add-on is not installed.'
-          not_configured: 'No Pacemaker cluster is configured.'
-          help:
-            default: 'Without HA setup, non-disruptive upgrade is not possible.'
-      prepare:
-        help:
-          default: 'Refer to the error message in the response'
-      adminbackup:
-        help:
-          default: 'Refer to the error message in the response'
-      adminrepocheck:
-        help:
-          default: 'Refer to the error message in the response'
-      cancel:
-        help:
-          default: 'Refer to the error message in the response'
 
   # Global
   overview: 'Overview'
