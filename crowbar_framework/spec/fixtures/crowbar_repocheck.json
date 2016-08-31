@@ -1,10 +1,8 @@
 {
   "os":{
-    "available":true,
-    "repos": {}
+    "available":true
   },
-  "openstack":{
-    "available":true,
-    "repos": {}
+  "cloud":{
+    "available":true
   }
 }
