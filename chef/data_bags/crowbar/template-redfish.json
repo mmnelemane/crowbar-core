@@ -1,0 +1,46 @@
+{
+  "id": "template-redfish",
+  "description": "The default proposal for the redfish barclamp",
+  "attributes": {
+    "redfish": {
+	  "bmc_enable" : false,
+	  "bmc_user": "root",
+	  "bmc_password": "cr0wBar!",
+      "ignore_address_suggestions": false,
+      "use_dhcp": false,
+	  "debug": false
+	 }
+  },
+  "deployment": {
+    "redfish": {
+      "crowbar-revision": 0,
+      "crowbar-applied": false,
+      "schema-revision": 100,
+      "element_states": {
+        "redfish": [ "discovering", "hardware-installing", "readying" ],
+        "bmc-nat-router": [ "readying", "ready", "applying" ],
+        "bmc-nat-client": [ "readying", "ready", "applying" ]
+      },
+      "elements": {},
+      "element_order": [
+        [ "redfish" ],
+        [ "bmc-nat-router", "bmc-nat-client" ]
+      ],
+      "element_run_list_order": {
+        "redfish": 15
+      },
+      "config": {
+        "environment": "redfish-base-config",
+        "mode": "full",
+        "transitions": true,
+        "transition_list": [
+          "discovering",
+          "hardware-installing",
+          "installed",
+          "readying"
+	]
+      } 
+    }
+  }
+}
+
