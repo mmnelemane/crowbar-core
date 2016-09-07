@@ -300,6 +300,7 @@ Rails.application.routes.draw do
       get :services
       get :prechecks
       post :cancel
+      get :repocheck
     end
 
     resources :nodes,
