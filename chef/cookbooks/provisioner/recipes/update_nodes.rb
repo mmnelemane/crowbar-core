@@ -249,7 +249,7 @@ if not nodes.nil? and not nodes.empty?
         when os =~ /^ubuntu/
           append << "url=#{node_url}/net_seed"
           template "#{node_cfg_dir}/net_seed" do
-            mode 0644
+            mode 0o644
             owner "root"
             group "root"
             source "net_seed.erb"
@@ -266,7 +266,7 @@ if not nodes.nil? and not nodes.empty?
         when os =~ /^(redhat|centos)/
           append << "ks=#{node_url}/compute.ks method=#{install_url}"
           template "#{node_cfg_dir}/compute.ks" do
-            mode 0644
+            mode 0o644
             source "compute.ks.erb"
             owner "root"
             group "root"
@@ -324,7 +324,7 @@ if not nodes.nil? and not nodes.empty?
 
           autoyast_template = mnode[:state] == "os-upgrading" ? "autoyast-upgrade" : "autoyast"
           template "#{node_cfg_dir}/autoyast.xml" do
-            mode 0644
+            mode 0o644
             source "#{autoyast_template}.xml.erb"
             owner "root"
             group "root"
@@ -375,7 +375,7 @@ if not nodes.nil? and not nodes.empty?
             license_key = mnode[:license_key] || ""
           end
           template "#{os_dir_win}/unattend/unattended.xml" do
-            mode 0644
+            mode 0o644
             owner "root"
             group "root"
             source "unattended.xml.erb"
@@ -423,7 +423,7 @@ if not nodes.nil? and not nodes.empty?
       end
 
       template pxefile do
-        mode 0644
+        mode 0o644
         owner "root"
         group "root"
         source "default.erb"
@@ -437,14 +437,14 @@ if not nodes.nil? and not nodes.empty?
         # grub.cfg has to be in boot/grub/ subdirectory
         directory "#{grubdir}/boot/grub" do
           recursive true
-          mode 0755
+          mode 0o755
           owner "root"
           group "root"
           action :create
         end
 
         template grubcfgfile do
-          mode 0644
+          mode 0o644
           owner "root"
           group "root"
           source "grub.conf.erb"
