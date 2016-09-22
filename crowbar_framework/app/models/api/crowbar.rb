@@ -18,11 +18,11 @@ require "open3"
 
 module Api
   class Crowbar < Tableless
-    attr_reader :version
+    attr_reader :version, :addons
 
     def initialize
       @version = ENV["CROWBAR_VERSION"]
-      @addons = addons
+      @addons = features
     end
 
     def status
@@ -66,14 +66,6 @@ module Api
     def maintenance_updates_missing?
       Open3.popen3("zypper patch-check") do |_stdin, _stdout, _stderr, wait_thr|
         [100, 101].include?(wait_thr.value.exitstatus)
-      end
-    end
-
-    def addons
-      [].tap do |list|
-        ["ceph", "ha"].each do |addon|
-          list.push(addon) if addon_installed?(addon)
-        end
       end
     end
 
@@ -154,6 +146,14 @@ module Api
 
     def upgrade_script_path
       Rails.root.join("..", "bin", "upgrade_admin_server.sh")
+    end
+
+    def features
+      [].tap do |list|
+        ["ceph", "ha"].each do |addon|
+          list.push(addon) if addon_installed?(addon)
+        end
+      end
     end
 
     def addon_installed?(addon)
