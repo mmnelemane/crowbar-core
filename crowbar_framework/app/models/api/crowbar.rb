@@ -151,7 +151,7 @@ module Api
     def features
       [].tap do |list|
         ["ceph", "ha"].each do |addon|
-          list.push(addon) if addon_installed?(addon)
+          list.push(addon) if addon_installed?(addon) && addon_enabled?(addon)
         end
       end
     end
@@ -168,6 +168,10 @@ module Api
       true
     rescue NameError
       false
+    end
+
+    def addon_enabled?(addon)
+      Api::Node.repocheck(addon: addon)[addon]["available"]
     end
 
     def repo_version_available?(products, product, version)
