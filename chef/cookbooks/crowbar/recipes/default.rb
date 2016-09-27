@@ -392,8 +392,6 @@ template "#{node[:apache][:dir]}/vhosts.d/crowbar.conf" do
 
   variables(
     port: web_port,
-    logfile: "/var/log/apache2/crowbar-access_log",
-    errorlog: "/var/log/apache2/crowbar-error_log",
     realm: realm
   )
 
