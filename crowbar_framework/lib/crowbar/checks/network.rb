@@ -56,16 +56,6 @@ module Crowbar
             ipv4_configured = true if ipv4_addrs.include?(addr_info.ip_address)
             ipv6_configured = true if ipv6_addrs.include?(addr_info.ip_address)
           end
-
-          unless ipv4_configured || ipv4_addrs.empty?
-            return false
-          end
-          # we don't really depend on IPv6, so no big deal
-          # unless ipv6_configured || ipv6_addrs.empty?
-          #   return false
-          # end
-
-          true
         end
 
         def ping_succeeds?
