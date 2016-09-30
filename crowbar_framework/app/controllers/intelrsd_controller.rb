@@ -31,12 +31,44 @@ require 'json'
 #   where the data model is employed.
 # 
 
-class IntelRSDController < ApplicationController
+class RsdController < ApplicationController
   attr_reader :logger, :insecure
 
-  def initialize()
-    @redfish_client = RedfishHelper::RedfishClient.new('localhost', '8443')
-    @node_object_list = []
+#  def initialize()
+#    @redfish_client = RedfishHelper::RedfishClient.new('localhost', '8443')
+#    @node_object_list = []
+#  end
+
+  def show
+    @title = "Welcome to RackScale Design"
+    @redfish_client = RedfishHelper::RedfishClient.new('10.160.66.119', '8443')
+    sys_list = get_all_systems()
+    p "SYSTEM LIST: #{sys_list}"
+    @rsd_systems = "Systems not Available"
+    unless sys_list.empty?
+      @rsd_systems = sys_list
+    end
+  end
+
+  def allocate
+    @redfish_client = RedfishHelper::RedfishClient.new('10.160.66.119', '8443')
+    p "Parameters obtained from UI: #{params}"
+    #p "SYSTEM IDS to Allocate: #{sys_id_list}"
+    #sys_id_list.each do | sys_id |
+    #  node = get_crowbar_node_object(sys_id)
+    #  node.allocate
+    #end
+
+    # Parameters: {"utf8"=>"✓", "authenticity_token"=>"TzPeenSh3H&#x2F;PyrmDsuiCcHTsH+tFTekyE8vwXrDcaAcD7E&#x2F;fzh7uk8lDe&#x2F;Cuy7lyz2ZLVEoSyLjB8Di0k4Slpw==", "return"=>"", "allocate"=>"Allocate", "1"=>"1", "3"=>"1", "5"=>"1", "7"=>"1"}
+    all_sys_list = get_systems()
+    all_sys_list.each do | sys_id |
+      if params["#{sys_id}"] == "1"
+        p "Allocating Node ${sys_id}"
+        node = get_crowbar_node_object(sys_id)
+        node.allocate
+      end
+    end
+    redirect_to rsd_show_path, notice: "Selected nodes allocated as compute nodes"
   end
 
   def get_system_resource_list(sys_id, resource)
@@ -61,8 +93,40 @@ class IntelRSDController < ApplicationController
     return nodeobject
   end
 
+  def get_processors(sys_id)
+    proc_list = get_system_resource_list(sys_id, "Processors")
+    processors = []
+    proc_list.each do | proc |
+      proc_object = Hash.new()
+      p "PROCESSOR DETAIL: #{proc}"
+      proc_object['Model'] = proc['Model']
+      proc_object['Manufacturer'] = proc['Manufacturer']
+      proc_object['Architecture'] = proc['Architecture']
+      proc_object['TotalCores'] = proc['TotalCores']
+      proc_object['TotalThreads'] = proc['TotalThreads']
+      processors.push(proc_object)
+    end
+    processors
+  end
+
+  def get_memory(sys_id)
+    mem_list = get_system_resource_list(sys_id, "Memory")
+    memories = []
+    mem_list.each do | mem |
+      mem_object = Hash.new()
+      mem_object['MemoryType'] = mem['MemoryType']
+      mem_object['CapacityMB'] = mem['CapacityMiB']
+      mem_object['Speed'] = mem['OperatingSpeedMHz']
+      mem_object['Size'] = mem['SizeMiB']
+      mem_object['Health'] = mem['Health']
+      memories.push(mem_object)
+    end
+    memories
+  end
+
   def get_systems()
     @systems = @redfish_client.get_resource("Systems")
+    p "RESOURCE: #{@systems}"
     sys_list = []
 
     @systems["Members"].each do |member|
@@ -81,6 +145,21 @@ class IntelRSDController < ApplicationController
       system_data["#{resource}"] = system_object["#{resource}"]
     end
     return system_data
+  end
+
+  def get_all_systems
+    sys_list = get_systems()
+    all_systems = []
+    p "SYSTEM ID LIST: #{sys_list}"
+    sys_list.each do | sys_id |
+      sys_object = Hash.new()
+      p "READING SYSTEM ID #{sys_id}"
+      sys_object['SystemId'] = sys_id
+      sys_object['Processors'] = get_processors(sys_id)
+      sys_object['Memory'] = get_memory(sys_id)
+      all_systems.push(sys_object)
+    end
+    all_systems
   end
 
   def get_rsd_nodes()
@@ -177,14 +256,15 @@ class IntelRSDController < ApplicationController
 
     node.set['filesystem']['sysfs'] = ""
     node.save
+    node
   end
 end
 
 # usage of the controller APIs
-rsd_controller = IntelRSDController.new
-node_list = rsd_controller.get_rsd_nodes()
-first_node = node_list.first
-p "FIRST NODE: #{first_node}"
+# rsd_controller = RsdController.new
+# node_list = rsd_controller.get_rsd_nodes()
+# first_node = node_list.first
+# p "FIRST NODE: #{first_node}"
 # node_object = rsd_controller.get_crowbar_node_object(first_node["System_Id"])
 # p node_object
 

@@ -40,7 +40,8 @@ module RedfishHelper
     end
   
     def handle_exception(json_rpc_error)
-      logger.error(json_rpc_error[:message])
+      # logger.error(json_rpc_error[:message])
+      "Exception"
     end
   
     def post_action(resource, action:None, params: None)
@@ -79,39 +80,39 @@ end
 # Usage Examples for this client library
 
 # Create a client object
-redfish_client = RedfishHelper::RedfishClient.new("localhost", "8443")
+# redfish_client = RedfishHelper::RedfishClient.new("10.160.66.119", "8443")
 
 # Check if the Redfish Service responds ( returns redfish/v1)
-api_resp = redfish_client.get_resource("")
-p api_resp
+# api_resp = redfish_client.get_resource("")
+# p api_resp
 
 # Check one of the API responses
-systems = redfish_client.get_resource("Systems")
-p systems
+# systems = redfish_client.get_resource("Systems")
+# p systems
 
-sys_list = []
+# sys_list = []
 
 # Loop to run through all available systems and populate a node-object
-systems["Members"].each do |member|
-  p "MEMBER DATA: #{member}"
-  member_id= member["@odata.id"]
-  p "MEMBER ID: #{member_id}"
-  sys_id = member_id.split(/\//)[-1]
-  p "SYSTEM ID: #{sys_id}"
-  sys_data = Hash.new()
-  sys_data["Systems"] = redfish_client.get_resource("Systems/#{sys_id}")
-  p "SYSTEMS DATA: #{sys_data["Systems"]}"
-  sys_data["Processors"] = redfish_client.get_resource("Systems/#{sys_id}/Processors/1")
-  p "PROCESSORS DATA: #{sys_data["Processors"]}"
-  sys_data["Memory"] = redfish_client.get_resource("Systems/#{sys_id}/Memory/1")
-  p "MEMORY DATA: #{sys_data["Memory"]}"
-  sys_data["MemoryChunks"] = redfish_client.get_resource("Systems/#{sys_id}/MemoryChunks/1")
-  p "MEMORY CHUNKS DATA: #{sys_data["MemoryChunks"]}"
-  sys_data["EthernetInterfaces"] = redfish_client.get_resource("Systems/#{sys_id}/EthernetInterfaces/1")
-  p "ETHERNET DATA: #{sys_data["EthernetInterfaces"]}"
-  sys_data["Adapters"] = redfish_client.get_resource("Systems/#{sys_id}/Adapters/1")
-  p "ADAPTERS DATA: #{sys_data["Adapters"]}"
-  sys_list.push(sys_data)
-end
+# systems["Members"].each do |member|
+#  p "MEMBER DATA: #{member}"
+#  member_id= member["@odata.id"]
+#  p "MEMBER ID: #{member_id}"
+#  sys_id = member_id.split(/\//)[-1]
+#  p "SYSTEM ID: #{sys_id}"
+#  sys_data = Hash.new()
+#  sys_data["Systems"] = redfish_client.get_resource("Systems/#{sys_id}")
+#  p "SYSTEMS DATA: #{sys_data["Systems"]}"
+#  sys_data["Processors"] = redfish_client.get_resource("Systems/#{sys_id}/Processors/1")
+#  p "PROCESSORS DATA: #{sys_data["Processors"]}"
+#  sys_data["Memory"] = redfish_client.get_resource("Systems/#{sys_id}/Memory/1")
+#  p "MEMORY DATA: #{sys_data["Memory"]}"
+#  sys_data["MemoryChunks"] = redfish_client.get_resource("Systems/#{sys_id}/MemoryChunks/1")
+#  p "MEMORY CHUNKS DATA: #{sys_data["MemoryChunks"]}"
+#  sys_data["EthernetInterfaces"] = redfish_client.get_resource("Systems/#{sys_id}/EthernetInterfaces/1")
+#  p "ETHERNET DATA: #{sys_data["EthernetInterfaces"]}"
+#  sys_data["Adapters"] = redfish_client.get_resource("Systems/#{sys_id}/Adapters/1")
+#  p "ADAPTERS DATA: #{sys_data["Adapters"]}"
+#  sys_list.push(sys_data)
+# end
 
-p "NODE OBJECT From Redfish : #{sys_list}"
+# p "NODE OBJECT From Redfish : #{sys_list}"
