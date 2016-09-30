@@ -56,6 +56,16 @@ module Crowbar
             ipv4_configured = true if ipv4_addrs.include?(addr_info.ip_address)
             ipv6_configured = true if ipv6_addrs.include?(addr_info.ip_address)
           end
+
+          unless ipv4_configured || ipv4_addrs.empty?
+            return false
+          end
+          # we don't really depend on IPv6, so no big deal
+          #unless ipv6_configured || ipv6_addrs.empty?
+          #  return false
+          #end
+
+          true
         end
 
         def ping_succeeds?
@@ -89,11 +99,10 @@ module Crowbar
             Resolv.getaddresses(fqdn).each do |address|
               ip_addr = IPAddr.new(address)
               if version == :ipv6
-                next unless ip_addr.ipv6?
+                addresses.push address if ip_addr.ipv6?
               else
-                next unless ip_addr.ipv4?
+                addresses.push address if ip_addr.ipv4?
               end
-              addresses.push address
             end
           end
         end
