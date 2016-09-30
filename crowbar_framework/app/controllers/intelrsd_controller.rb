@@ -32,14 +32,36 @@ require "json"
 # where the data model is employed.
 #
 
-class IntelRSDController < ApplicationController
+class RsdController < ApplicationController
   attr_reader :logger, :insecure
 
-  def initialize
-    host = ENV["CROWBAR_REDFISH_HOST"] || "localhost"
-    port = ENV["CROWBAR_REDFISH_PORT"] || "8443"
-    @redfish_client = RedfishHelper::RedfishClient.new(host, port)
-    @node_object_list = []
+#  def initialize()
+#    @redfish_client = RedfishHelper::RedfishClient.new('localhost', '8443')
+#    @node_object_list = []
+#  end
+
+  def show
+    @title = "Welcome to RackScale Design"
+    @redfish_client = RedfishHelper::RedfishClient.new('10.160.66.119', '8443')
+    sys_list = get_all_systems()
+    p "SYSTEM LIST: #{sys_list}"
+    @rsd_systems = "Systems not Available"
+    unless sys_list.empty?
+      @rsd_systems = sys_list
+    end
+  end
+
+  def allocate
+    @redfish_client = RedfishHelper::RedfishClient.new('10.160.66.119', '8443')
+    all_sys_list = get_systems()
+    all_sys_list.each do | sys_id |
+      if params["#{sys_id}"] == "1"
+        node = get_crowbar_node_object(sys_id)
+        node.allocate
+        node.set_state("ready")
+      end
+    end
+    redirect_to rsd_show_path, notice: "Selected nodes allocated as compute nodes"
   end
 
   def get_system_resource_list(sys_id, resource)
@@ -64,8 +86,40 @@ class IntelRSDController < ApplicationController
     nodeobject
   end
 
-  def get_systems
+  def get_processors(sys_id)
+    proc_list = get_system_resource_list(sys_id, "Processors")
+    processors = []
+    proc_list.each do | proc |
+      proc_object = Hash.new()
+      p "PROCESSOR DETAIL: #{proc}"
+      proc_object['Model'] = proc['Model']
+      proc_object['Manufacturer'] = proc['Manufacturer']
+      proc_object['Architecture'] = proc['Architecture']
+      proc_object['TotalCores'] = proc['TotalCores']
+      proc_object['TotalThreads'] = proc['TotalThreads']
+      processors.push(proc_object)
+    end
+    processors
+  end
+
+  def get_memory(sys_id)
+    mem_list = get_system_resource_list(sys_id, "Memory")
+    memories = []
+    mem_list.each do | mem |
+      mem_object = Hash.new()
+      mem_object['MemoryType'] = mem['MemoryType']
+      mem_object['CapacityMB'] = mem['CapacityMiB']
+      mem_object['Speed'] = mem['OperatingSpeedMHz']
+      mem_object['Size'] = mem['SizeMiB']
+      mem_object['Health'] = mem['Health']
+      memories.push(mem_object)
+    end
+    memories
+  end
+
+  def get_systems()
     @systems = @redfish_client.get_resource("Systems")
+    p "RESOURCE: #{@systems}"
     sys_list = []
 
     @systems["Members"].each do |member|
@@ -86,22 +140,32 @@ class IntelRSDController < ApplicationController
     system_data
   end
 
-  def get_rsd_nodes
-    system_list = get_systems
-    system_list.each do |system|
-      node_object = make_node_object_for_system(system)
-      @node_object_list.push(node_object)
+  def get_all_systems
+    sys_list = get_systems()
+    all_systems = []
+    p "SYSTEM ID LIST: #{sys_list}"
+    sys_list.each do | sys_id |
+      sys_object = Hash.new()
+      p "READING SYSTEM ID #{sys_id}"
+      sys_object['SystemId'] = sys_id
+      sys_object['Processors'] = get_processors(sys_id)
+      sys_object['Memory'] = get_memory(sys_id)
+      all_systems.push(sys_object)
     end
-    @node_object_list
+    all_systems
   end
 
   def get_crowbar_node_object(sys_id)
     system_object = get_system_data(sys_id)
     node_name_prefix = "d"
-    node_name_prefix = "IRSD" if system_object["Oem"].key?("Intel_RackScale")
+    node_name_prefix = "IRSD-" if system_object["Oem"].key?("Intel_RackScale")
+ 
+    p "SYSTEM OBJECT READ: #{system_object}"
 
+    # Pickin up the first IP address. This may not be always the correct address.
+    # It must be revisited when testing with Rackscale hardware.
     eth_interface = system_object["EthernetInterfaces"].first
-    node_name = node_name_prefix + eth_interface["MACAddress"].tr(":", "-")
+    node_name = node_name_prefix + eth_interface["MACAddress"].tr(":", "-") + "-#{sys_id}"
 
     node = NodeObject.create_new "#{node_name}.#{Crowbar::Settings.domain}".downcase
 
@@ -110,15 +174,16 @@ class IntelRSDController < ApplicationController
     node.set["rackscale"] = true
     # track the rackscale id for this node
     node.set["rackscale_id"] = sys_id
-    node.set["target_cpu"] = ""
+    node.set["target_cpu"] = "x86_64"
     node.set["target_vendor"] = "suse"
-    node.set["host_cpu"] = ""
+    node.set["host_cpu"] = system_object['ProcessorSummary']['Model']
     node.set["host_vendor"] = "suse"
     node.set["kernel"] = ""   # Kernel modules and configurations
     node.set["counters"] = "" # various network interfaces and other counters
     node.set["hostname"] = node_name
     node.set["fqdn"] = "#{node_name}.#{Crowbar::Settings.domain}"
     node.set["domain"] = Crowbar::Settings.domain
+    
     ipaddress_data = eth_interface["IPv4Addresses"].first
     node.set["ipaddress"] = ipaddress_data["Address"]
     node.set["macaddress"] = eth_interface["MACAddress"]
@@ -131,7 +196,7 @@ class IntelRSDController < ApplicationController
     node.set["roles"] = []
     ["deployer-config-default", "network-config-default", "dns-config-default",
      "logging-config-default", "ntp-config-default",
-     "provisioner-base", "provisioner-config-default"].each do |role_name|
+     "provisioner-base", "provisioner-config-default", "nova-compute"].each do |role_name|
       node["roles"] << role_name
     end
 
@@ -143,25 +208,15 @@ class IntelRSDController < ApplicationController
     node.set["virtualization"]["role"] = "guest"
     node.set["platform"] = "suse"
     node.set["platform_version"] = "12.1"
-    node.set["dmi"]["bios"]["all_records"] = ""
-    node.set["dmi"]["bios"]["vendor"] = ""
     node.set["dmi"]["bios"]["version"] = system_object["BiosVersion"]
-    node.set["dmi"]["bios"]["release_date"] = ""
-    node.set["dmi"]["bios"]["address"] = ""
-    node.set["dmi"]["bios"]["runtime_size"] = ""
-    node.set["dmi"]["bios"]["rom_size"] = ""
-    node.set["dmi"]["bios"]["bios_revision"] = ""
     node.set["dmi"]["system"]["product_name"] = system_object["Model"]
-    node.set["dmi"]["system"]["manufacturer"] = ""
-    node.set["dmi"]["system"]["serial_number"] = "Not Specified"
-    node.set["dmi"]["system"]["uuid"] = ""
+    node.set["dmi"]["system"]["manufacturer"] = system_object["Manufacturer"]
+    node.set["dmi"]["system"]["serial_number"] = system_object["SerialNumber"]
+    node.set["dmi"]["system"]["uuid"] = system_object["UUID"]
     node.set["dmi"]["system"]["wake_up_type"] = "Power Switch"
     node.set["dmi"]["system"]["sku_number"] = "Not Specified"
     node.set["dmi"]["system"]["family"] = "Not Specified"
     node.set["dmi"]["chassis"]["serial_number"] = system_object["SerialNumber"]
-    node.set["dmi"]["chassis"]["all_records"] = ""
-    node.set["dmi"]["chassis"]["manufacturer"] = ""
-    node.set["dmi"]["chassis"]["all_records"] = ""
     node.set["dmi"]["chassis"]["boot_up_state"] = "Safe"
     node.set["dmi"]["chassis"]["power_supply_state"] = "Safe"
     # this is needed so its counted properly for the UI
@@ -185,15 +240,6 @@ class IntelRSDController < ApplicationController
 
     node.set["filesystem"]["sysfs"] = ""
     node.save
-    node.allocate
-    node.set_state("ready")
+    node
   end
-end
-
-# run it on a thread to not block the UI at the start
-Thread.new do
-  rsd_controller = IntelRSDController.new
-  node_list = rsd_controller.get_systems
-  first_node = node_list.first
-  rsd_controller.get_crowbar_node_object(first_node)
 end
