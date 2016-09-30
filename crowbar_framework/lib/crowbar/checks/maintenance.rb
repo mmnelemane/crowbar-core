@@ -21,16 +21,24 @@ module Crowbar
     class Maintenance
       class << self
         def updates_status
-          error =
+          {}.tap do |ret|
+            ret[:passed] = true
+            ret[:errors] = []
             Open3.popen3("zypper patch-check") do |_stdin, _stdout, _stderr, wait_thr|
               case wait_thr.value.exitstatus
               when 100
-                "ZYPPER_EXIT_INF_UPDATE_NEEDED: patches available for installation."
+                ret[:passed] = false
+                ret[:errors].push(
+                  I18n.t("api.crowbar.maintenance_updates_status.patches_missing")
+                )
               when 101
-                "ZYPPER_EXIT_INF_SEC_UPDATE_NEEDED: security patches available for installation."
+                ret[:passed] = false
+                ret[:errors].push(
+                  I18n.t("api.crowbar.maintenance_updates_status.security_patches_missing")
+                )
               end
             end
-          error ? { errors: [error] } : {}
+          end
         end
       end
     end
