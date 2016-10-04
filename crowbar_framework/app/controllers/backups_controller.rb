@@ -84,6 +84,6 @@ class BackupsController < ApplicationController
   end
 
   def backup_params
-    params.require(:backup).permit(:name)
+    params.require(:api_backup).permit(:name)
   end
 end
