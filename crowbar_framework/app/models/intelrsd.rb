@@ -14,6 +14,113 @@
 # limitations under the License.
 #
 
+# the root class
 class IntelRSD < ActiveResource::Base
-  attr_accessor :url
+  attr_accessor :host, :port, :protocol
+
+  def initialize
+    @managers = Managers.new
+    @systems = Systems.new
+    @chassis = Chassis.new
+    @redfish_client = RedfishHelper::RedfishClient.new(host, port, protocol)
+  end
+
+  def self.get_version
+  end
+
+  def self.get_uuid
+  end
+
+  def self.get_managers
+    @managers
+  end
+
+  def self.get_systems
+    @systems
+  end
+
+  def self.get_chassis
+    @chassis
+  end
 end
+
+# Managers
+class Managers
+
+  def get_links
+  end
+
+  def get_managed_systems
+  end
+
+  def get_managed_services
+  end
+
+  def get_managed_switches
+  end
+
+  def get_managed_interfaces
+  end
+end
+
+# Systems 
+class Systems
+  def get_links
+  end
+
+  def get_systemid_list
+  end
+
+  def get_system_processors
+  end
+
+  def get_system_memory
+  end
+  
+  def get_system_info
+  end
+
+  def get_system_interfaces
+  end
+
+  def get_system_chassis
+  end
+
+  def reset_system
+  end
+end
+
+#Chassis
+class Chassis
+  def get_links
+  end
+
+  def get_chassis_systems
+  end
+end
+
+
+#Services
+class Services
+end
+
+class Switches
+  def get_switch_ports
+  end
+
+  def get_switch_vlans
+  end
+end
+
+class Interfaces
+  def get_interface_protocols
+  end
+
+  def get_interface_managers
+  end
+
+  def get_interface_systems
+  end
+end
+
+

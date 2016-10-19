@@ -105,4 +105,16 @@ module RedfishHelper
       end
     end
   end
+
+  class RedfishMapper
+    attr_reader :logger
+
+    def map_links
+    end
+
+    def map_resource
+    end
+
+  end
+
 end
